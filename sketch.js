@@ -50,6 +50,7 @@ function setup() {
     // randomPicturePositionX = random(control.canvasWidth);
     // randomPicturePositionY = random(control.canvasHeight);
     // console.log(randomPicturePositionX + " : " + randomPicturePositionY);
+    loadPhotos();
     console.log(pointArray);
 
   }
@@ -59,25 +60,31 @@ function setup() {
    * Draw on the canvas.
    */
   function draw() {
+    frameRate(20);
 
     lineLoader(control.numShapes);
     rectLoader(control.numShapes);
     pointLoader(control.numShapes);
     ellipseLoader(control.numShapes);
-    // loadPhotos(control.numImages);
 
 
-    // Define how often the canvas is refreshed.
-    frameRate(10);
+
     myCanvas.width = control.canvasWidth;
     myCanvas.height = control.canvasHeight;
 
     if (loadCollageButton) {
-      for (let i = 0; i < control.numImages; i++) {
-        loadPicture();
+      if (goLoadPhotos || loadCollageButton) {
+        print("Start loading photos...")
+
+        for (let i = 0; i < int(control.numImages); i++) {
+          doSleep(2000).then(() => {
+            var randomImg = new picture("https://source.unsplash.com/random/" +
+              control.imgSize + "/?" + control.theme + "&key=" + random(1000));
+            loadPhotos(randomImg);
+          });
       }
-
-
+        goLoadPhotos = false;
+      }
 
       switch (control.Shape) {
         case "rect":
@@ -109,30 +116,23 @@ function setup() {
           strokeWeight(control.shapeWeight);
           ellipseArray[i].displayEllipse();
         }
-
-
       }
 
-
-
-
+      // If the background has changed, update.
+      if (bgColorChanged) {
+          background(control.backgroundColor);
+          bgColorChanged = false;
+          imageLoaded = false;
+          // loadPicture();
+      }
 
       loadCollageButton = false;
 
-    }
-
-
-    // If the background has changed, update.
-    if (bgColorChanged) {
-        background(control.backgroundColor);
-        bgColorChanged = false;
-        imageLoaded = false;
-        // loadPicture();
-    }
+    } // end loadCollage
 
     // Draw a line if enabled.
     if (control.Draw === "line") {
-        // print("Line color: " + control.Color);
+        print("Line color: " + control.Color);
         stroke(control.Color);
         strokeWeight(control.Size);
         if (mouseIsPressed === true) {
@@ -150,51 +150,43 @@ function setup() {
         }
     }
 
+  } //end draw function
 
+
+
+  function loadPhotos(img){
+    cnt = 0;
+    start = new Date();
+      doSleep(2000).then(() => {
+        imageArray.push(img);
+
+          w = random(control.canvasWidth - 500);
+          h = random(control.canvasHeight - 200);
+          img.display(w, h);
+          print("Display photo: " + img.x + "," + img.y  +  ", time: " + elapsedTime(start, new Date()));
+        cnt++;
+      });
+
+    end = new Date();
 
   }
 
-  function loadPhotos(){
-    for (let i = 0; i < control.numImages; i++) {
-      randomImg = new picture("https://source.unsplash.com/random/" + control.imgSize + "/?" + control.theme);
-      sleep(2000).then(() => {
-        imageArray.push(randomImg);
-      })
 
+  function loadPicture() {
+    if (!imageLoaded || themeChanged) {
+        p1 = new picture(imageLibrary + control.imgSize + "/?" + control.theme);
+        // Pause to let the image load, before attempting display.
+        doSleep(doSleepTime).then(() => {
+            p1.display(0, 0);
+            print(p1.url);
+            // print(randomCanvasPositionX + ", " + randomCanvasPositionY);
+
+        });
+        themeChanged = false;
+        imageLoaded = true;
 
     }
-    console.log(imageArray);
-  }
-
-  /**
-   * Load an image.
-   */
-  function loadPicture() {
-      if (!imageLoaded || themeChanged) {
-          p1 = new picture(imageLibrary + control.imgSize + "/?" + control.theme);
-          // Pause to let the image load, before attempting display.
-          sleep(4000).then(() => {
-              p1.display(0, 0);
-              print(p1.url);
-              // print(randomCanvasPositionX + ", " + randomCanvasPositionY);
-
-          });
-          themeChanged = false;
-          imageLoaded = true;
-
-      }
-  }
-
-
-  function updateDisplay(gui) {
-      for (var i in gui.__controllers) {
-          gui.__controllers[i].updateDisplay();
-      }
-      for (var f in gui.__folders) {
-          updateDisplay(gui.__folders[f]);
-      }
-  }
-
+}
 
 
 /**
@@ -318,20 +310,24 @@ function Controls() {
     this.theme = "random";
     this.img = null;
     this.imgSize = "600x400";
-    this.numImages = 0;
+    this.numImages = 2;
     this.canvasHeight = canvasHeight;
     this.canvasWidth = canvasWidth;
-    this.backgroundColor = "white";
-    this.Color = "white";
+    this.backgroundColor = [ 0, 128, 255 ];
+    this.Color = [ 0, 128, 255 ];
     this.Draw = "line";
     this.Size = 5;
     this.Shape = "line";
     this.numShapes = 5;
-    this.shapeColor = "black";
+    this.shapeColor = [ 255, 0, 255 ];;
     this.shapeWeight = 5;
     this.LoadCollage = function() {
       loadCollageButton = true;
       console.log("LoadCollage button was pressed");
+    }
+    this.ClearCollage = function() {
+      clear();
+      console.log("Clear-Collage Button was pressed");
     }
 }
 
@@ -347,7 +343,7 @@ function createControls() {
     canvasSizeWidthControl = canvasFolder.add(control, "canvasWidth", 50, screen.width);
     canvasSizeHeightControl = canvasFolder.add(control, "canvasHeight", 50, screen.height);
 
-    bgControl = canvasFolder.add(control, "backgroundColor");
+    bgControl = canvasFolder.addColor(control, "backgroundColor");
     bgControl.onFinishChange(function(value) {
         print("New background color: " + value);
         bgColorChanged = true;
@@ -387,7 +383,7 @@ function createControls() {
       numShapesChanged = true;
     })
 
-    shapeColor = shapesFolder.add(control, "shapeColor", ["black", "red", "blue", "white"]);
+    shapeColor = shapesFolder.addColor(control, "shapeColor");
     shapeWeight = shapesFolder.add(control, "shapeWeight", 1, 25);
 
     drawFolder = gui.addFolder("Draw");
@@ -399,7 +395,7 @@ function createControls() {
     });
 
     //drawFolder.add(control, "circle");
-    drawColor = drawFolder.add(control, "Color", ["white", "black", "red", "blue"]);
+    drawColor = drawFolder.addColor(control, "Color");
     drawColor.onFinishChange(function(value) {
         print("Draw color is: " + value);
         colorChanged = true;
@@ -412,13 +408,14 @@ function createControls() {
     });
 
     loadMyCollage = gui.add(control, "LoadCollage");
+    clearCollage  = gui.add(control, "ClearCollage");
 
     canvasFolder.open();
     imageFolder.open();
     drawFolder.open();
     shapesFolder.open();
 
-    updateDisplay(gui);
+    // updateDisplay(gui);
 }
 
 
@@ -435,6 +432,11 @@ function variableEllipse(x, y, px, py) {
 function keyPressed() {
     enterKeyPressed = (keyCode === ENTER);
 }
+
+function doSleep(time) {
+    return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 
 /**
  * Pause for some time (milliseconds).
