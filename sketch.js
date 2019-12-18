@@ -61,6 +61,8 @@ function setup() {
    */
   function draw() {
     frameRate(20);
+    myCanvas.width = control.canvasWidth;
+    myCanvas.height = control.canvasHeight;
 
     lineLoader(control.numShapes);
     rectLoader(control.numShapes);
@@ -69,10 +71,10 @@ function setup() {
 
 
 
-    myCanvas.width = control.canvasWidth;
-    myCanvas.height = control.canvasHeight;
+
 
     if (loadCollageButton) {
+
       if (goLoadPhotos || loadCollageButton) {
         print("Start loading photos...")
 
@@ -309,17 +311,17 @@ function ellipseLoader(num) {
 function Controls() {
     this.theme = "random";
     this.img = null;
-    this.imgSize = "600x400";
+    this.imgSize = "400x200";
     this.numImages = 2;
     this.canvasHeight = canvasHeight;
     this.canvasWidth = canvasWidth;
-    this.backgroundColor = [ 0, 128, 255 ];
+    this.backgroundColor = [ 255, 255, 255 ];
     this.Color = [ 0, 128, 255 ];
     this.Draw = "line";
     this.Size = 5;
     this.Shape = "line";
     this.numShapes = 5;
-    this.shapeColor = [ 255, 0, 255 ];;
+    this.shapeColor = [ 255, 110, 18 ];;
     this.shapeWeight = 5;
     this.LoadCollage = function() {
       loadCollageButton = true;
@@ -328,6 +330,10 @@ function Controls() {
     this.ClearCollage = function() {
       clear();
       console.log("Clear-Collage Button was pressed");
+    }
+    this.SaveCollage = function() {
+      saveCanvas(myCanvas, 'myCollage', 'png');
+      console.log("SaveCanvas button clicked");
     }
 }
 
@@ -409,6 +415,7 @@ function createControls() {
 
     loadMyCollage = gui.add(control, "LoadCollage");
     clearCollage  = gui.add(control, "ClearCollage");
+    saveCollage = gui.add(control, "SaveCollage");
 
     canvasFolder.open();
     imageFolder.open();
