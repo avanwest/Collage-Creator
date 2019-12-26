@@ -6,7 +6,7 @@ let imageLibrary = "https://source.unsplash.com/random/";
 let p1, p2, p3, p4, p5;
 let control;
 let myCanvas;
-let canvasWidth = 1100;
+let canvasWidth = 800;
 let canvasHeight = 800;
 let imageLoaded = false;
 let themeChanged = false;
@@ -40,13 +40,14 @@ function preload() {
 function setup() {
     myCanvas = createCanvas(canvasWidth, canvasHeight);
     myCanvas.parent('canvas-container');
+    background(255);
     createControls();
 
-    lineLoader(100);
-    rectLoader(100);
-    pointLoader(100);
-    ellipseLoader(100);
-    vertexLoader(100);
+    lineLoader(50);
+    rectLoader(50);
+    pointLoader(50);
+    ellipseLoader(50);
+    vertexLoader(50);
 
   }
 
@@ -58,16 +59,18 @@ function setup() {
 
     // reload shape arrays if canvas size is adjusted
     if (canvasWidthChanged || canvasHeightChanged) {
-      lineArray = new Array();
-      rectArray = new Array();
-      pointArray = new Array();
-      ellipseArray = new Array();
-      rectLoader(control.numShapes);
-      pointLoader(control.numShapes);
-      ellipseLoader(control.numShapes);
-      lineLoader(control.numShapes);
+      lineArray = [];
+      rectArray = [];
+      pointArray = [];
+      ellipseArray = [];
+      rectLoader(50);
+      pointLoader(50);
+      ellipseLoader(50);
+      lineLoader(50);
+      vertexLoader(control.numShapes);
       canvasWidthChanged = false;
       canvasHeightChanged = false;
+      console.log("canvas size was changed to: " + control.canvasWidth + "X" + control.canvasHeight);
 
     }
 
@@ -391,15 +394,6 @@ function Controls() {
 
 }
 
-// function randoCollage() {
-//   control.numImages = Math.floor(random(10));
-//   print(control.numImages);
-//   Controls.updateDisplay();
-// }
-
-
-
-
 /**
  * Create the control panel.
  */
@@ -490,7 +484,6 @@ function createControls() {
 
     // Action Buttons ------------------------------------
     loadMyCollage = gui.add(control, "LoadCollage");
-    randomCollage = gui.add(control, "RandomCollage");
     clearCollage  = gui.add(control, "ClearCollage");
     saveCollage = gui.add(control, "SaveCollage");
 
@@ -509,9 +502,7 @@ function variableEllipse(x, y, px, py) {
     ellipse(x, y, speed, speed);
   }
 
-/**
- * This is called whenever a key is pressed.
- */
+
 function keyPressed() {
     enterKeyPressed = (keyCode === ENTER);
 }
